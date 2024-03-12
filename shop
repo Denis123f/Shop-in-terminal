@@ -1,0 +1,212 @@
+#include <iostream>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+class Intertnet_shop
+{	
+	int ItemSum = 0;
+	struct InfoItems 
+	{
+		short price;
+		short quantity;
+	};
+	map <string, vector<InfoItems>> Products;
+
+	map <string, vector<InfoItems>> UnitBox;
+
+	virtual bool CheckItem(string product, short number_item)
+	{
+		// Наличие товара при добавлений его в корзину
+
+		for (auto [name, value] : Products)
+		{
+			if (name == product)
+			{
+				short price = value[0].price;
+				short quantity = value[0].quantity - number_item;
+				Products.erase(name);
+				Products[name].push_back({ price, quantity });
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	public:
+	
+	Intertnet_shop()
+	{
+		cout << "Hello in my shop\n";
+		Products["sugar"].push_back({ 100, 500 });
+	}
+
+	bool password(short password)
+	{
+		// Проверка на сотрудника
+		if (password == 1254) return 1;
+		cout << "not accsess\n";
+		return 0;
+	}
+
+	virtual void Replenishment(string name, short price, short quantity)
+	{
+		// Добавление новых 
+		
+		if (price > 0 && quantity > 0)
+		{
+			Products[name].push_back({ price, quantity });
+			cout << "Product added the shop\n";
+		}else
+		{
+			cout << "Your not added Item < 0";
+		}
+		
+	}
+
+	virtual void ListTheItems()
+	{
+		// Список товаров
+
+		if (Products.size() != 0) {
+			cout << "\nThere is proudcts in shop:\n";
+			for (auto [name, value] : Products) cout << "name:  " << name << "\nprice  " << value[0].price << "\nquantity  " << value[0].quantity << endl << endl;
+		}
+		else
+		{
+			cout << "Sorry, not products!\n";
+		}
+	}
+
+	virtual void Box(string product, short number_item)
+	{
+		// Добавление товаров в корзину 
+
+		if(CheckItem(product, number_item))
+		{
+			UnitBox[product].push_back({ Products[product][0].price, number_item });
+		}else
+		{
+			cout << "Sorry, not product";
+		}
+	}
+
+	virtual void CheckAllBox()
+	{
+		//Проверить, что купил
+
+		ItemSum = 0;
+		if(UnitBox.size())
+		{
+			for (auto [name, value] : UnitBox)
+			{
+				ItemSum += value[0].price * value[0].quantity;
+				cout << "\nname:\t" << name << "\nprice\t" << value[0].price << "\nquantity\t" << value[0].quantity << endl;
+			}
+		}else
+		{
+			cout << "Your box all clear:(\n";
+		}
+		cout << "All sum your order = " << ItemSum << endl;
+	}
+
+	virtual int OrderCalculation()
+	{
+		// Расчёт заказа
+		ItemSum = 0;
+		if(UnitBox.size())
+		{
+			for (auto [name, value] : UnitBox)
+			{
+				ItemSum += value[0].price * value[0].quantity;
+			}
+		}else
+		{
+			cout << "Your Backet clear"; 
+			
+		}
+		return ItemSum;
+	}
+	 ~Intertnet_shop()
+	{
+		for (auto [name, value] : Products) Products.erase(name);
+		for (auto [name, value] : UnitBox) UnitBox.erase(name);
+		cout << "\nGoodbay";
+	}
+};
+
+
+int main() {
+	string product;
+	short password;
+	short quantity;
+	short price;
+	int money = 0;
+	bool work = 1;
+	Intertnet_shop User;
+
+	short usersReply = 0;
+	while(work)
+	{
+		cout << "\n1 = add the shop\n2 = list the items\n3 = add the box\n4 = Check the Box\n5 = Pay the box\n6 = exit\nYour reply = ";
+		cin >> usersReply;
+		switch (usersReply)
+		{
+		case 1:
+			cout << "password = ";
+			cin >> password;
+			if (User.password(password)) {
+				cout << "\nEnter the item name = ";
+				cin >> product;
+				cout << "quantity = ";
+				cin >> quantity;
+				cout << "price = ";
+				cin >> price;
+				User.Replenishment(product, price, quantity);
+				break;
+			}else
+			{
+				break;
+			}
+		case 2:
+			User.ListTheItems();
+			break;
+		case 3:
+			cout << "Enter the Item = ", cin >> product;
+			cout << "Enter the quantity = ", cin >> quantity;
+			User.Box(product, quantity);
+			break;
+		case 4:
+			User.CheckAllBox();
+			break;
+		case 5:
+			cout << "Sum your order = " << User.OrderCalculation() << "\nEnter your money: ";
+			cin >> money;
+			while (work)
+			{
+				if (User.OrderCalculation() > money)
+				{
+					cout << "Not have money, take the pleas = " << (User.OrderCalculation()) - money << "\n", cin >> password;
+					money += password;
+				}
+				else
+				{
+					if (User.OrderCalculation() == money)
+					{
+						cout << "Tnaks your buy";
+					}else
+					{
+						cout << "Your change = " << money - User.OrderCalculation();
+					}
+					work = 0;
+				}
+			}	
+		case 6:
+			work = 0;
+			break;
+		}	
+	}
+	return 0;
+}
+
